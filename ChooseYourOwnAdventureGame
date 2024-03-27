@@ -1,5 +1,5 @@
-import javax.sound.sampled.*;
-import javax.swing.*;
+import javax.sound.sampled.;
+import javax.swing.;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,164 +7,159 @@ import java.io.File;
 import java.io.IOException;
 
 public class ChooseYourOwnAdventureGame extends JFrame implements ActionListener {
-    private JLabel imageLabel;
-    private JLabel messageLabel;
-    private JButton[] choiceButtons;
-    private JButton startButton;
+private JLabel imageLabel;
+private JLabel messageLabel;
+private JButton[] choiceButtons;
+private JButton startButton;
 
-    private ImageIcon[] images;
-    private String[][] choices;
-    private int[] nextSceneIndices;
-    private String[]sceneMessages;
+private ImageIcon[] images;
+private String[][] choices;
+private int[] nextSceneIndices;
+private String[] sceneMessages;
 
-    private int currentScene;
-    private boolean gameStarted;
+private int currentScene;
+private boolean gameStarted;
 
-    private Clip backgroundMusic;
-    private String buttonPanel;
+private Clip backgroundMusic;
 
+public ChooseYourOwnAdventureGame() {
+    setTitle("Choose Your Own Adventure Game");
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(600, 600);
+    setLocationRelativeTo(null);
 
-    public ChooseYourOwnAdventureGame() {
-        setTitle("Choose Your Own Adventure Game");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 600);
-        setLocationRelativeTo(null);
+    // Initialize start button
+    startButton = new JButton("Start Game");
+    startButton.addActionListener(this);
 
-        imageLabel = new JLabel();
-        add(imageLabel, BorderLayout.CENTER);
+    // Add start button to the frame
+    add(startButton, BorderLayout.SOUTH);
 
-        messageLabel = new JLabel();
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(messageLabel, BorderLayout.NORTH);
+    // Load images and choices
+    // Note: Adjust file paths as needed
+    images = new ImageIcon[]{
+            new ImageIcon("C:\\Users\\adamr\\Pictures\\DnD Maps\\5aWTwfRcTNXHsFEXZKzFLP.jpg"),
+            new ImageIcon("C:\\Users\\adamr\\OneDrive\\Pictures\\D&D Photos\\Kuo-toa-5e.jpg"),
+            new ImageIcon("C:\\Users\\adamr\\OneDrive\\Pictures\\D&D Photos\\Tarrasque.jpeg")
+    };
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(2, 2));
-        add(buttonPanel, BorderLayout.SOUTH);
+    choices = new String[][]{
+            {"Go left", "Go right"},
+            {"Take the path", "Go back"},
+            {"Open the door", "Leave it closed"}
+    };
 
-        choiceButtons = new JButton[2];
-        for (int i = 0; i < choiceButtons.length; i++) {
-            choiceButtons[i] = new JButton();
-            choiceButtons[i].addActionListener(this);
-            buttonPanel.add(choiceButtons[i]);
+    nextSceneIndices = new int[]{1, 2, 2};
+
+    sceneMessages = new String[]{
+            "You find yourself in the village. Townsfolk speak of great evils upon their land, Orcs raid their village, an evil wizard has taken residence in a nearby tower, and something sinister dwells deep in the caverns below. Where do you adventure to? ",
+            "You come face to face with a terrible beast!",
+            "Test3"
+    };
+
+    // Initialize current scene
+    currentScene = 0;
+
+    // Initialize game state
+    gameStarted = false;
+}
+
+private void playBackgroundMusic(String filePath) {
+    try {
+        File audioFile = new File("C:\\Users\\adamr\\Music\\Game Music\\1671070607971009.webm");
+        if (!audioFile.exists()) {
+            System.err.println("Error: Audio file not found.");
+            return;
         }
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+        AudioFormat format = audioStream.getFormat();
+        DataLine.Info info = new DataLine.Info(Clip.class, format);
+        backgroundMusic = (Clip) AudioSystem.getLine(info);
+        backgroundMusic.open(audioStream);
+        backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
+    } catch (IOException | UnsupportedAudioFileException | LineUnavailableException ex) {
+        ex.printStackTrace();
+    }
+}
 
-        images = new ImageIcon[]{
-                new ImageIcon("C:\\Users\\adamr\\Pictures\\DnD Maps\\5aWTwfRcTNXHsFEXZKzFLP.jpg"),
-                new ImageIcon("C:\\Users\\adamr\\OneDrive\\Pictures\\D&D Photos\\Kuo-toa-5e.jpg"),
-                new ImageIcon("C:\\Users\\adamr\\OneDrive\\Pictures\\D&D Photos\\Tarrasque.jpeg")
-        };
+private void displayScene(int sceneIndex) {
+    // Remove the start button when game starts
+    remove(startButton);
 
-        choices = new String[][]{
-                {"Go left", "Go right"},
-                {"Take the path", "Go back"},
-                {"Open the door", "Leave it closed"}
-        };
+    // Initialize image label and set image
+    imageLabel = new JLabel(images[sceneIndex]);
+    imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        nextSceneIndices = new int[]{1, 2, 2};
+    // Initialize message label and set text
+    messageLabel = new JLabel(sceneMessages[sceneIndex]);
+    messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        sceneMessages = new String[]{
-                "You find yourself in the village. Townsfolk speak of great evils upon their land, Orcs raid their village, an evil wizard has taken residence in a nearby tower, and something sinister dwells deep in the caverns below. Where do you adventure to? ",
-                "You come face to face with a terrible beast!",
-                "Test3"
-        };
+    // Initialize button panel
+    JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
 
-        currentScene = 0;
-        displayScene(currentScene);
+    // Initialize choice buttons and add action listeners
+    choiceButtons = new JButton[2];
+    for (int i = 0; i < choiceButtons.length; i++) {
+        choiceButtons[i] = new JButton(choices[sceneIndex][i]);
+        choiceButtons[i].addActionListener(this);
+        buttonPanel.add(choiceButtons[i]);
     }
 
-    private void playBackgroundMusic(String filePath) {
-        try {
-            File audioFile = new File("C:\\Users\\adamr\\Music\\Game Music\\1671070607971009.webm");
-            if (!audioFile.exists()) {
-                System.err.println("Error: Audio file not found.");
-                return;
+    // Clear content pane and set layout
+    getContentPane().removeAll();
+    getContentPane().setLayout(new BorderLayout());
+
+    // Add components to content pane
+    getContentPane().add(imageLabel, BorderLayout.CENTER);
+    getContentPane().add(messageLabel, BorderLayout.NORTH);
+    getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+    // Refresh content pane
+    revalidate();
+    repaint();
+}
+
+@Override
+public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == startButton) {
+        if (!gameStarted) {
+            // Start the game
+            gameStarted = true;
+            playBackgroundMusic(""); // Play background music
+            displayScene(currentScene); // Display the initial scene
+        }
+    } else if (e.getSource() instanceof JButton && gameStarted) {
+        // Handle choice button clicks
+        JButton clickedButton = (JButton) e.getSource();
+        String buttonText = clickedButton.getText();
+
+        int choiceIndex = -1;
+        for (int i = 0; i < choiceButtons.length; i++) {
+            if (buttonText.equals(choices[currentScene][i])) {
+                choiceIndex = i;
+                break;
             }
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            AudioFormat format = audioStream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            backgroundMusic = (Clip) AudioSystem.getLine(info);
-            backgroundMusic.open(audioStream);
-            backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException ex) {
-            ex.printStackTrace();
         }
-    }
 
-    private void displayScene(int sceneIndex) {
-        imageLabel.setIcon(images[sceneIndex]);
-        messageLabel.setText(sceneMessages[sceneIndex]);
-        ImageIcon originalIcon = images[sceneIndex];
-        Image originalImage = originalIcon.getImage();
-
-        int targetWidth = 450;
-        int targetHeight = 450;
-
-
-        Image resizedImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
-
-        ImageIcon resizedIcon = new ImageIcon(resizedImage);
-
-        JLabel imageLabel = new JLabel(resizedIcon);
-
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-
-        getContentPane().setLayout(new BorderLayout());
-
-        messageLabel.setText(sceneMessages[sceneIndex]);
-
-        getContentPane().add(imageLabel, BorderLayout.CENTER);
-
-        for (int i = 0; i < choiceButtons.length; i++) {
-            choiceButtons[i].setText(choices[sceneIndex][i]);
-        }
-        // Set the content pane's layout to BorderLayout
-        getContentPane().setLayout(new BorderLayout());
-
-        // Add the imageLabel to the content pane's CENTER position
-        getContentPane().add(imageLabel, BorderLayout.CENTER);
-
-        // Add the buttonPanel to the content pane's SOUTH position
-        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == startButton) {
-            if (!gameStarted) {
-                gameStarted = true;
-                startButton.setEnabled(false); // Disable the start button once game has started
+        if (choiceIndex != -1) {
+            // Update current scene based on user choice
+            currentScene = nextSceneIndices[currentScene];
+            if (currentScene < images.length) {
+                // Display the next scene
                 displayScene(currentScene);
-            }
-        } else if (e.getSource() instanceof JButton && gameStarted) {
-            JButton clickedButton = (JButton) e.getSource();
-            String buttonText = clickedButton.getText();
-
-            int choiceIndex = -1;
-            for (int i = 0; i < choiceButtons.length; i++) {
-                if (buttonText.equals(choices[currentScene][i])) {
-                    choiceIndex = i;
-                    break;
-                }
-            }
-
-            if (choiceIndex != -1) {
-                currentScene = nextSceneIndices[currentScene];
-                if (currentScene < images.length) {
-                    displayScene(currentScene);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Game Over! Thanks for playing.");
-                    backgroundMusic.stop();
-                    System.exit(0);
-                }
+            } else {
+                // End of game
+                JOptionPane.showMessageDialog(this, "Game Over! Thanks for playing.");
+                backgroundMusic.stop();
+                System.exit(0);
             }
         }
     }
+}
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ChooseYourOwnAdventureGame game = new ChooseYourOwnAdventureGame();
-            game.setVisible(true);
-        });
-    }
+public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> {
+        ChooseYourOwnAdventureGame game = new ChooseYourOwnAdventureGame();
+        game.setVisible(true);
+    });
 }
